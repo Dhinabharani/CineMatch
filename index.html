@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CineMatch — Discover, Track & Watch Movies (OMDb Edition)</title>
+  <meta name="description" content="Explore popular movies, search titles, view plot synopses, cast details, and curate your personalized watchlist with OMDb API." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container">
+      <div class="brand-logo">
+        <span class="logo-icon">🎬</span>
+        <span>Cine<span>Match</span></span>
+      </div>
+
+      <nav>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="#" class="nav-link active" data-tab="home">Home</a></li>
+          <li><a href="#" class="nav-link" data-tab="trending">Popular</a></li>
+          <li><a href="#" class="nav-link" data-tab="top_rated">Top Rated</a></li>
+          <li>
+            <a href="#" class="nav-link" data-tab="watchlist">
+              Watchlist <span class="badge" id="watchlist-badge" style="display: none;">0</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <!-- Search Bar -->
+        <form class="search-box" id="search-form">
+          <span class="search-icon">🔍</span>
+          <input
+            type="text"
+            id="search-input"
+            class="search-input"
+            placeholder="Search movies..."
+            autocomplete="off"
+            aria-label="Search movies"
+          />
+          <button type="button" class="search-clear" id="search-clear-btn" aria-label="Clear search">✕</button>
+        </form>
+
+        <!-- API Key Settings Button -->
+        <button class="btn-icon" id="btn-api-key-modal" title="OMDb API Key Settings" aria-label="OMDb API Key Settings">
+          ⚙️
+        </button>
+
+        <!-- Mobile Menu Toggle -->
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle navigation menu">
+          ☰
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Featured Movie Banner -->
+  <section class="hero-section" id="hero-section" style="display: none;">
+    <div class="hero-backdrop" id="hero-backdrop"></div>
+    <div class="hero-overlay"></div>
+    <div class="container">
+      <div class="hero-content">
+        <span class="hero-badge">Featured Movie</span>
+        <h1 class="hero-title" id="hero-title">Loading Featured Title...</h1>
+        <div class="hero-meta">
+          <span class="hero-rating" id="hero-rating">★ 0.0</span>
+          <span>•</span>
+          <span id="hero-release">2026</span>
+        </div>
+        <p class="hero-overview" id="hero-overview"></p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" id="hero-details-btn">
+            <span>ℹ️</span> View Details
+          </button>
+          <button class="btn btn-secondary" id="hero-watchlist-btn">
+            <span>+</span> Add to Watchlist
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Genre Filter Bar -->
+  <div class="genre-bar">
+    <div class="container">
+      <div class="genre-chips" id="genre-chips"></div>
+    </div>
+  </div>
+
+  <!-- Main Content Section -->
+  <main class="main-content">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title" id="section-title">Discover Movies</h2>
+        <div class="sort-wrapper" id="sort-wrapper" style="display: none;">
+          <label for="sort-select">Sort by:</label>
+          <select id="sort-select" class="sort-select">
+            <option value="popularity.desc">Most Popular</option>
+            <option value="vote_average.desc">Highest Rated</option>
+            <option value="primary_release_date.desc">Newest Releases</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Status Container (Loading, Errors, Empty States) -->
+      <div id="status-container" style="display: none;"></div>
+
+      <!-- Movie Grid Container -->
+      <div class="movie-grid" id="movie-grid">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+
+      <!-- Load More Container -->
+      <div class="load-more-container" id="load-more-container">
+        <button class="btn btn-secondary" id="load-more-btn">Load More Movies</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Movie Details Modal -->
+  <div class="modal" id="movie-modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-dialog">
+      <button class="modal-close-btn" id="modal-close-btn" aria-label="Close modal">✕</button>
+      
+      <div class="modal-backdrop-header" id="modal-backdrop">
+        <div class="modal-overlay"></div>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-main-info">
+          <div class="modal-poster-wrapper">
+            <img id="modal-poster" src="" alt="Movie Poster" />
+          </div>
+          <div class="modal-text-content">
+            <h2 class="modal-title" id="modal-title"></h2>
+            <p class="modal-tagline" id="modal-tagline"></p>
+            <div class="modal-stats">
+              <span class="modal-rating" id="modal-rating">★ 0.0</span>
+              <span>•</span>
+              <span id="modal-release">2026</span>
+              <span>•</span>
+              <span id="modal-runtime">0m</span>
+            </div>
+            <div class="modal-genres" id="modal-genres"></div>
+            <div>
+              <button class="btn btn-secondary" id="modal-watchlist-btn">
+                <span>+</span> Add to Watchlist
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-section">
+          <h3 class="modal-section-title">Plot & Synopsis</h3>
+          <p class="modal-overview" id="modal-overview"></p>
+        </div>
+
+        <div class="modal-section">
+          <h3 class="modal-section-title">Key Cast</h3>
+          <div class="modal-cast-list" id="modal-cast-list"></div>
+        </div>
+
+        <div class="modal-section" id="modal-trailer-wrapper">
+          <h3 class="modal-section-title">Official Trailer</h3>
+          <p class="text-muted" style="margin-bottom: 0.75rem; font-size: 0.88rem;">
+            Watch verified trailers and teasers on YouTube:
+          </p>
+          <a id="modal-trailer-link" href="#" target="_blank" rel="noopener" class="btn btn-primary trailer-btn">
+            <span>▶</span> Watch Trailer on YouTube
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- API Key Configuration Modal -->
+  <div class="modal" id="api-key-modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-dialog api-key-dialog">
+      <button class="modal-close-btn" id="api-key-modal-close" aria-label="Close modal">✕</button>
+      
+      <div class="api-key-header">
+        <h2>OMDb API Key Setup</h2>
+        <p>
+          CineMatch fetches live movies directly from the Open Movie Database (OMDb). Get your free API key at 
+          <a href="http://www.omdbapi.com/apikey.aspx" target="_blank" rel="noopener">omdbapi.com/apikey.aspx</a>.
+        </p>
+      </div>
+
+      <div class="form-group">
+        <label for="api-key-input" class="form-label">OMDb API Key:</label>
+        <input
+          type="text"
+          id="api-key-input"
+          class="text-input"
+          placeholder="Paste your OMDb API Key here..."
+          autocomplete="off"
+        />
+        <div class="api-key-status" id="api-key-status-msg"></div>
+      </div>
+
+      <div class="api-key-actions">
+        <button type="button" class="btn btn-secondary" id="btn-clear-api-key" style="display: none;">Remove Key</button>
+        <button type="button" class="btn btn-primary" id="btn-save-api-key">Save & Connect</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2026 CineMatch. Designed for film lovers.</p>
+      <p>
+        Powered by <a href="http://www.omdbapi.com/" target="_blank" rel="noopener">OMDb API</a>. Movie data and posters courtesy of Open Movie Database.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Main JavaScript File -->
+  <script src="script.js"></script>
+</body>
+</html>
